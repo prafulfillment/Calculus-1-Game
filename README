@@ -1,0 +1,63 @@
+TicTacTix Game
+This game tests the gamers’ ability to understand:
+
+   1. Finding maxima and minima and saddle points
+   2. Taking derivatives
+   3. Solving equations
+   4. Algebra
+   5. Dexterity (might hit the wrong claim)
+
+
+
+Claims:
+min [x in X] max [y in Y] f(x,y) >= c
+
+e.g.:
+Claim Rel2Ex(c): min [x in [0,1]] max [y in [0,1]] (x*y + (1-x)(1-y^2)) >= c
+
+Consider claims:
+Rel2Ex(0.55)
+Rel2Ex(0.60)
+Rel2Ex(0.65)
+Rel2Ex(1.00)
+
+Rules of game:
+
+   1. The game will provide the player 4 claims of which Player 1 will have to determine the one they should choose. [5 minutes]
+   2. Once Player 1 chooses a claim, he/she has the opportunity to strengthen the claim further. [1 minute]
+   3. After Player 1 is satisfied with the claim, they send the claim to their opponent, Player 2.
+   4. Player 2 has the following options [5 minutes]:
+         1. Strengthen claim
+            Player 2 states that the claim is weak and adjusts c to a satisfiable level.
+         2. Refute claim
+            Player 2 states that the claim is incorrect and provides a value for x that asssures Player 1 is unable to find a corresponding y value for.
+         3. Agree with claim
+            Player 2 agrees the claim is optimal.
+   5. Player 2 sends the decision to Player 1.
+   6. Player 1 has the option that corresponds to the above choices: [2 minutes]
+         1. Refute claim
+         2. Find a corresponding y-value
+   7. Round continues until either Player 1 or Player 2 has agreed with the claim. [2 minutes/action]
+   8. Computer checks result 
+
+
+
+
+-------------------------------
+
+Claim Rel2Ex(c): [x in [0,1]] [y in [0,1]] (x+y) >= c
+
+Consider claims:
+Rel2Ex(1.00)
+Rel2Ex(2.00)
+Rel2Ex(3.00)
+Rel2Ex(4.00)
+
+
+
+------------------------------
+
+Strategy:
+
+    * Pay - Building defenses
+    * Calc - Building up attack
