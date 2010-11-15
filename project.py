@@ -250,7 +250,7 @@ class GameOverScreen(object):
 current_screen = None
 def create_optionscreen():
   global current_screen
-  current_screen = OptionScreen(['option1', 'option2', 'option3', 'option4'], 'submit')
+  current_screen = OptionScreen(['x + y < 1', 'x + y < 2', 'x + y < 3', 'x + y < 4'], 'submit')
   current_screen.donehandler = switch_to_game
 
 def switch_to_game(option):
