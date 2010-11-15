@@ -5,6 +5,7 @@
 # tested with Python24 and Pygame171    vegaseat   02feb2007
 
 import pygame as pg
+import math
 
 # initialize pygame
 pg.init()
@@ -15,10 +16,6 @@ pg.init()
 # ideally the image should have a black background or
 # you have to fill the screen with the matching background
 image_file = "ball_r.gif"
-
-# image moves [x, y] at a time
-# you can change trajectory, speed and direction
-im_dir = [2, 1]
 
 # RGB color tuple for screen background
 black = (0,0,0)
@@ -41,27 +38,46 @@ except:
 
 # get the rectangle the image occupies
 im_rect = image.get_rect()
+im_rect[1] = sh - image.get_width()
 
 # the event loop also loops the animation code
+tx = 0
+ty = 0
+a = math.pi/4
+g = 9.81
+v = 100
+vx = v * math.cos(a)
+vy = v * math.sin(a)
 while True:
     pg.event.pump()
     keyinput = pg.key.get_pressed()
     # exit on corner 'x' click or escape key press
     if keyinput[pg.K_ESCAPE] or pg.event.peek(pg.QUIT):
-        raise SystemExit
+        raise SystemExit    
 
-    # set the move
-    im_rect = im_rect.move(im_dir)
-    # detect the boundaries and change directions
-    # left/right boundaries are 0 to sreen width
-    if im_rect.left < 0 or im_rect.right > sw:
-        im_dir[0] = -im_dir[0]
-    # top/bottom boundaries are 0 to screen height
-    if im_rect.top < 0 or im_rect.bottom > sh:
-        im_dir[1] = -im_dir[1]
-    # this erases the old sreen with black
     screen.fill(black)
     # put the image on the screen
+
+    tx = tx + .1
+
+    x = vx*tx
+
+    y = (-vy*ty + (g * ty**2)) + (sh - image.get_height())
+    
+    if y > sh - image.get_height():
+        vy = vy * .9
+        ty = 0.0
+        y = sh - image.get_height()
+    else:
+        ty = ty + 0.1
+    
+
+    if x < sw + image.get_width():
+        im_rect[0] = x
+        im_rect[1] = y
+        print "x,y = ",x, y
+
+
     screen.blit(image, im_rect)
     # update screen
     pg.display.flip()
