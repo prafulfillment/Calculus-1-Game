@@ -255,8 +255,8 @@ def create_optionscreen():
 
 def switch_to_game(option):
   global current_screen,house_skin, bg_skin, catapult_skin
-  #current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
-  current_screen = GameOverScreen(create_optionscreen)
+  current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
+  #current_screen = GameOverScreen(create_optionscreen)
 
 create_optionscreen()
 
