@@ -2,6 +2,8 @@ import os
 import pygame
 from pygame.locals import *
 import graphics
+import pygame.font, pygame.event, pygame.draw, string
+
 
 def load_image(*path):
   image = pygame.image.load(os.path.join(os.getcwd(), 'data', *path)).convert()
@@ -218,7 +220,7 @@ class GameOverScreen(object):
     pass
   
   def draw(self, screen):
-    text = graphics.Graphics.renderText('\\s(26)Game Over')
+    text = graphics.Graphics.renderText('\\c(white)\\s(26)Game Over')
     screen.blit(text, (screen.get_rect().width / 2. - text.get_rect().width / 2,
                        screen.get_rect().height / 2. - text.get_rect().height / 2))
     self.button.draw(screen)
@@ -253,9 +255,53 @@ def create_optionscreen():
   current_screen = OptionScreen(['x + y < 1', 'x + y < 2', 'x + y < 3', 'x + y < 4'], 'submit')
   current_screen.donehandler = switch_to_game
 
+def get_key():
+  while 1:
+    event = pygame.event.poll()
+    if event.type == KEYDOWN:
+      return event.key
+    else:
+      pass
+
+def display_box(message):
+  "Print a message in a box in the middle of the screen"
+  fontobject = pygame.font.Font(None,18)
+  pygame.draw.rect(screen, (0,0,0),
+                   ((screen.get_width() / 2) - 100,
+                    (screen.get_height() / 2) - 10,
+                    200,20), 0)
+  pygame.draw.rect(screen, (255,255,255),
+                   ((screen.get_width() / 2) - 102,
+                    (screen.get_height() / 2) - 12,
+                    204,24), 1)
+  if len(message) != 0:
+    screen.blit(fontobject.render(message, 1, (255,255,255)),
+                ((screen.get_width() / 2) - 100, (screen.get_height() / 2) - 10))
+  pygame.display.flip()
+
+def AskScreen(question):
+  "ask(question) -> answer"
+  pygame.font.init()
+  current_string = []
+  display_box(question + ": " + string.join(current_string,""))
+  while 1:
+    inkey = get_key()
+    if inkey == K_BACKSPACE:
+      current_string = current_string[0:-1]
+    elif inkey == K_RETURN:
+      break
+    elif inkey == K_MINUS:
+      current_string.append("_")
+    elif inkey <= 127:
+      current_string.append(chr(inkey))
+    display_box(question + ": " + string.join(current_string,""))
+  return string.join(current_string,"")
+
+
 def switch_to_game(option):
   global current_screen,house_skin, bg_skin, catapult_skin
-  current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
+  #current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
+  current_screen = AskScreen("Give us x:")
   #current_screen = GameOverScreen(create_optionscreen)
 
 create_optionscreen()
