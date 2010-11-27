@@ -220,7 +220,7 @@ class GameOverScreen(object):
     pass
   
   def draw(self, screen):
-    text = graphics.Graphics.renderText('\\c(white)\\s(26)Game Over')
+    text = graphics.Graphics.renderText('\\s(26)Game Over')
     screen.blit(text, (screen.get_rect().width / 2. - text.get_rect().width / 2,
                        screen.get_rect().height / 2. - text.get_rect().height / 2))
     self.button.draw(screen)
@@ -282,25 +282,37 @@ def display_box(message):
 def AskScreen(question):
   "ask(question) -> answer"
   pygame.font.init()
-  current_string = []
-  display_box(question + ": " + string.join(current_string,""))
+  current_string = ""
+  display_box(question + current_string)
   while 1:
     inkey = get_key()
     if inkey == K_BACKSPACE:
       current_string = current_string[0:-1]
     elif inkey == K_RETURN:
       break
-    elif inkey == K_MINUS:
-      current_string.append("_")
-    elif inkey <= 127:
-      current_string.append(chr(inkey))
-    display_box(question + ": " + string.join(current_string,""))
-  return string.join(current_string,"")
+    # check for
+    #      negative      decimal               numbers
+    elif inkey == 45 or inkey == 46 or (inkey >=48 and inkey <= 57):
+      current_string += chr(inkey)
+    display_box(question + current_string)
+  return current_string
+
+def choose_val(val='x', f_range=(0,1)):
+  val_num = float('inf')
+  while val_num < f_range[0] or val_num > f_range[1]:
+    val_num = AskScreen("Give us "+val+": ")
+    try:
+        val_num = float(val_num)
+        print val_num
+    except ValueError: 
+        pass
 
 def switch_to_game(option):
   global current_screen,house_skin, bg_skin, catapult_skin
-  #current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
-  current_screen = AskScreen("Give us x:")
+  val_x = choose_val()
+  val_y = choose_val('y')
+  val_c = choose_val('c')
+  current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
   #current_screen = GameOverScreen(create_optionscreen)
 
 create_optionscreen()
