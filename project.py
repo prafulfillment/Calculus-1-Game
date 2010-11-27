@@ -253,6 +253,11 @@ def create_optionscreen():
   current_screen = OptionScreen(['x + y < 1', 'x + y < 2', 'x + y < 3', 'x + y < 4'], 'submit')
   current_screen.donehandler = switch_to_game
 
+def create_optionscreen():
+  global current_screen
+  current_screen = OptionScreen(['x + y < 1', 'x + y < 2', 'x + y < 3', 'x + y < 4'], 'submit')
+  current_screen.donehandler = switch_to_game
+
 def switch_to_game(option):
   global current_screen,house_skin, bg_skin, catapult_skin
   #current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
