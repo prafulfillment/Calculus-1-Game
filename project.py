@@ -220,7 +220,7 @@ class GameOverScreen(object):
     pass
   
   def draw(self, screen):
-    text = graphics.Graphics.renderText('\\c(white)\\s(26)Game Over')
+    text = graphics.Graphics.renderText('\\s(26)Game Over')
     screen.blit(text, (screen.get_rect().width / 2. - text.get_rect().width / 2,
                        screen.get_rect().height / 2. - text.get_rect().height / 2))
     self.button.draw(screen)
@@ -250,9 +250,31 @@ class GameOverScreen(object):
 
 
 current_screen = None
-def create_optionscreen():
+formula = 'x + y'
+inequality = ' < '
+constants = [1, 2, 3, 4]
+optimal_val = 1
+options = [formula+inequality+str(c) for c in constants]
+"""
+TODO: 
++Create a formula object.
+import random 
+class formula:
+    \"""formula class\"""
+    def __init__(self, expression, inequality, optimal_val, difficulty=1):
+        self.exp = expression
+        self.ineq = inequality
+        self.opt_v = optimal_val
+        self.c = [self.opt_v]
+        self.c.append([random.normalvariate(self.opt_v,difficulty) in range(3)])
++Calculate constants based on optimal value & difficulty. 
+-- More difficult, lower std dev consts are from the optimal_val 
+-- #use random.normalvariate(mu, sigma)
+"""
+
+def create_optionscreen(opt=options):
   global current_screen
-  current_screen = OptionScreen(['x + y < 1', 'x + y < 2', 'x + y < 3', 'x + y < 4'], 'submit')
+  current_screen = OptionScreen(options, 'submit')
   current_screen.donehandler = switch_to_game
 
 def get_key():
@@ -282,26 +304,37 @@ def display_box(message):
 def AskScreen(question):
   "ask(question) -> answer"
   pygame.font.init()
-  current_string = []
-  display_box(question + ": " + string.join(current_string,""))
+  current_string = ""
+  display_box(question + current_string)
   while 1:
     inkey = get_key()
     if inkey == K_BACKSPACE:
       current_string = current_string[0:-1]
     elif inkey == K_RETURN:
       break
-    elif inkey == K_MINUS:
-      current_string.append("_")
-    elif inkey <= 127:
-      current_string.append(chr(inkey))
-    display_box(question + ": " + string.join(current_string,""))
-  return string.join(current_string,"")
+    # check for
+    #      negative      decimal               numbers
+    elif inkey == 45 or inkey == 46 or (inkey >=48 and inkey <= 57):
+      current_string += chr(inkey)
+    display_box(question + current_string)
+  return current_string
 
+def choose_val(val='x', f_range=(0,1)):
+  val_num = float('inf')
+  while val_num < f_range[0] or val_num > f_range[1]:
+    val_num = AskScreen("Give us "+val+": ")
+    try:
+        val_num = float(val_num)
+        print val_num
+    except ValueError: 
+        pass
 
 def switch_to_game(option):
   global current_screen,house_skin, bg_skin, catapult_skin
-  #current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
-  current_screen = AskScreen("Give us x:")
+  val_x = choose_val()
+  val_y = choose_val('y')
+  val_c = choose_val('c')
+  current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
   #current_screen = GameOverScreen(create_optionscreen)
 
 create_optionscreen()
