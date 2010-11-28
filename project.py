@@ -250,9 +250,39 @@ class GameOverScreen(object):
 
 
 current_screen = None
-def create_optionscreen():
+
+def claim_chooser():
+    formula = 'x + y'
+    inequality = ' < '
+    constants = [1, 2, 3, 4]
+    optimal_val = 1
+    options = [formula+inequality+str(c) for c in constants]
+    create_optionscreen(options)
+
+def action_screen():
+    options = ["Strengthen claim", "Refute claim", "Agree with claim"]
+    create_optionscreen(options)
+
+"""
+TODO: 
++Create a formula object.
+import random 
+class formula:
+    \"""formula class\"""
+    def __init__(self, expression, inequality, optimal_val, difficulty=1):
+        self.exp = expression
+        self.ineq = inequality
+        self.opt_v = optimal_val
+        self.c = [self.opt_v]
+        self.c.append([random.normalvariate(self.opt_v,difficulty) in range(3)])
++Calculate constants based on optimal value & difficulty. 
+-- More difficult, lower std dev consts are from the optimal_val 
+-- #use random.normalvariate(mu, sigma)
+"""
+
+def create_optionscreen(options):
   global current_screen
-  current_screen = OptionScreen(['x + y < 1', 'x + y < 2', 'x + y < 3', 'x + y < 4'], 'submit')
+  current_screen = OptionScreen(options, 'submit')
   current_screen.donehandler = switch_to_game
 
 def get_key():
@@ -312,11 +342,11 @@ def switch_to_game(option):
   val_x = choose_val()
   val_y = choose_val('y')
   val_c = choose_val('c')
+  action_screen()
   current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
   #current_screen = GameOverScreen(create_optionscreen)
 
-create_optionscreen()
-
+claim_chooser()
 running = True
 
 while running :
