@@ -43,6 +43,7 @@ AREA_SIZE = 1600, 600
 FPS = 60
 
 
+x,y,c=(0,0,0)
 height_offset = 400
 left_offset = 20
 
@@ -251,39 +252,43 @@ class GameOverScreen(object):
 
 current_screen = None
 
-def claim_chooser():
-    formula = 'x + y'
-    inequality = ' < '
-    constants = [1, 2, 3, 4]
-    optimal_val = 1
-    options = [formula+inequality+str(c) for c in constants]
-    create_optionscreen(options)
-
-def action_screen():
-    options = ["Strengthen claim", "Refute claim", "Agree with claim"]
-    create_optionscreen(options)
-
-"""
-TODO: 
-+Create a formula object.
+formula = 'x + y'
 import random 
-class formula:
-    \"""formula class\"""
+class formulac:
+    """formula class"""
     def __init__(self, expression, inequality, optimal_val, difficulty=1):
         self.exp = expression
         self.ineq = inequality
         self.opt_v = optimal_val
         self.c = [self.opt_v]
-        self.c.append([random.normalvariate(self.opt_v,difficulty) in range(3)])
+        self.c.extend([random.normalvariate(self.opt_v,difficulty) in range(3)])
+
+inequality = ' <= '
+constants = [1, 2, 3, 4]
+def claim_chooser():
+    optimal_val = 1
+    options = [formula+inequality+str(c) for c in constants]
+    create_optionscreen(options,action_screen)
+
+def action_screen(i):
+    global c 
+    c = constants[i]
+    print c
+    options = ["Strengthen claim", "Refute claim", "Agree with claim"]
+    create_optionscreen(options,switch_to_game)
+
+"""
+TODO: 
++Create a formula object.
 +Calculate constants based on optimal value & difficulty. 
 -- More difficult, lower std dev consts are from the optimal_val 
 -- #use random.normalvariate(mu, sigma)
 """
 
-def create_optionscreen(options):
+def create_optionscreen(options,done):
   global current_screen
   current_screen = OptionScreen(options, 'submit')
-  current_screen.donehandler = switch_to_game
+  current_screen.donehandler = done
 
 def get_key():
   while 1:
@@ -327,26 +332,30 @@ def AskScreen(question):
     display_box(question + current_string)
   return current_string
 
-def choose_val(val='x', f_range=(0,1)):
+def choose_val(val, f_range=(0,1)):
   val_num = float('inf')
   while val_num < f_range[0] or val_num > f_range[1]:
     val_num = AskScreen("Give us "+val+": ")
     try:
         val_num = float(val_num)
-        print val_num
     except ValueError: 
         pass
-
-def switch_to_game(option):
-  global current_screen,house_skin, bg_skin, catapult_skin
-  val_x = choose_val()
-  val_y = choose_val('y')
-  val_c = choose_val('c')
-  action_screen()
-  current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
-  #current_screen = GameOverScreen(create_optionscreen)
+  return val_num
 
 claim_chooser()
+def switch_to_game(option):
+  global current_screen,house_skin, bg_skin, catapult_skin
+  global x,y,c
+  if option == 0:
+      c = choose_val('c')
+  elif option == 1:
+     x = choose_val('x')
+     y = choose_val('y')
+  else:
+    print eval(formula+inequality+str(c))
+    current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
+  #current_screen = GameOverScreen(create_optionscreen)
+
 running = True
 
 while running :
