@@ -164,11 +164,10 @@ class Button(object):
   
 
 class OptionScreen(object):
-  def __init__(self, options, buttoncaption, donehandler=lambda x:None):
+  def __init__(self, options, donehandler=lambda x:None):
     global WIDTH, HEIGHT
     
     self.options = options
-    self.button = buttoncaption
     self.selected = 0
     self.lastmouse = (0,0)
     self.donehandler = donehandler
@@ -185,23 +184,11 @@ class OptionScreen(object):
       return pygame.Rect(button_hoffset, button_voffset, button_width, button_height)
     
     
-    for idx, option in enumerate(self.options + [buttoncaption]):
-      if idx == len(self.options):
-        button = Button(getbuttonmetrics(real_button_height, 0.5, idx), option)
-        def donebutton(button=button):
-          for i, b in enumerate(self.buttons):
-            if b.selected:
-              self.donehandler(i)
-        button.onclick = donebutton
-      else:
-        button = Button(getbuttonmetrics(real_button_height, buttonhperc, idx), option)
-        def select_this_button(self=self, button=button):
-          for b in self.buttons:
-            if b == button:
-              button.selected = True
-            else:
-              b.selected = False
-        button.onclick = select_this_button
+    for idx, option in enumerate(self.options):
+      button = Button(getbuttonmetrics(real_button_height, buttonhperc, idx), option)
+      def select_this_button(self=self, button=button):
+        self.donehandler(idx)
+      button.onclick = select_this_button
       self.buttons.append(button)
   
   def draw(self, screen):
