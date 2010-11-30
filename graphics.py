@@ -328,6 +328,8 @@ class Graphics(object):
                         cur_color = (int(param[0:2],16),
                                      int(param[2:4],16),
                                      int(param[4:6],16))
+                    elif function == 'X':
+                        return Graphics.convertFormulaToPNG(param)
                     elif function == 'b':
                         cur_font.set_bold(str_to_num(param))
                     elif function == 'i':

@@ -364,7 +364,7 @@ def create_AskScreen(question):
 ## Main functions ## 
 def claim_chooser():
     optimal_val = 1
-    options = ['P1 choose ('+formula+inequality+str(c)+')' for c in constants]
+    options = ['P1 choose \X('+formula+inequality+str(c)+')' for c in constants]
     change_player()
     create_OptionScreen(options,action_screen)
 
