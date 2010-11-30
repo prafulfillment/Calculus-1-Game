@@ -239,7 +239,8 @@ class Graphics(object):
 
     # The syntax for a text command: backslash, a single alphanumeric character,
     # then zero or more alphanumeric or whitespace characters in parentheses.
-    command_regex = r'\\\w\(.*?\)'
+    command_regex = r'\\\w\((\\\(|\\\)|.)*?\)'
+    #re.VERBOSE = True
     command_pattern = re.compile(command_regex)
    
     @staticmethod
@@ -319,6 +320,7 @@ class Graphics(object):
                 cmd_text = line[cmd.start() : cmd.end()]
                 function = cmd_text[1]
                 param = cmd_text[3 : -1]   # This range guaranteed to exist by the regex match
+                param = param.replace('\\(', '(').replace('\\)', ')')
                 pos = cmd.end()
                 
                 # Process the command

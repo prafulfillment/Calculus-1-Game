@@ -42,8 +42,8 @@ catapult_skin = 'default'
 ## TODO: MOVE INTO FORMULAC CLASS ##
 inequality = ' >= '
 constants = [0.55, 0.60, 0.65]
-formula = 'x**2'
-#formula = 'x*y+(1-x)*(1-y**2)'
+#formula = 'x**2'
+formula = 'x*y+\\(1-x\\)*\\(1-y**2\\)'
 #formula_print = sympy.pretty(sympy.sympify(formula))
 x,y,c=(0,0,0)
 
@@ -186,8 +186,8 @@ class OptionScreen(object):
     
     for idx, option in enumerate(self.options):
       button = Button(getbuttonmetrics(real_button_height, buttonhperc, idx), option)
-      def select_this_button(self=self, button=button):
-        self.donehandler(idx)
+      def select_this_button(self=self, button=button, buttonidx=idx):
+        self.donehandler(buttonidx)
       button.onclick = select_this_button
       self.buttons.append(button)
   
@@ -360,7 +360,7 @@ def action_screen(i):
     c = constants[i] if( not i==-1) else c
     claim = formula+inequality+str(c)
     options = ["Strengthen", "Refute", "Agree with"]
-    options = ["P%d %s (%s)" %(player,x,claim) for x in options]
+    options = ["P%d %s (\\X(%s))" %(player,x,claim) for x in options]
     create_OptionScreen(options,switch_to_game)
 
 def switch_to_game(option):
@@ -385,7 +385,7 @@ def switch_to_game(option):
         display_box(action)
         pygame.time.wait(5000)
     else:
-        if (bool(eval(f))):
+        if (bool(eval(f.replace('\\(', '(').replace('\\)', ')')))):
             current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
         else:
             display_box("Claim incorrect")
