@@ -143,7 +143,7 @@ class Button(object):
     
     pygame.draw.rect(screen, color, self.rect)
     pygame.draw.rect(screen, (128, 128, 128), self.rect, 1)
-    renderedText = graphics.Graphics.renderText(self.caption, font_size=18)
+    renderedText = graphics.Graphics.renderText(self.caption)
     screen.blit(renderedText, 
                (self.rect.left + self.rect.width / 2. - renderedText.get_rect().width / 2., 
                self.rect.top + self.rect.height / 2. - renderedText.get_rect().height / 2.))
@@ -363,7 +363,7 @@ def create_AskScreen(question):
 ## Main functions ## 
 def claim_chooser():
     optimal_val = 1
-    options = [formula_print+inequality+str(c) for c in constants]
+    options = ['\s(18)'+formula_print+inequality+str(c) for c in constants]
     change_player()
     create_OptionScreen(options,action_screen)
 
@@ -411,8 +411,6 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
-display_box(formula_print)
-pygame.time.wait(10000)
 claim_chooser()
 
 while running :
