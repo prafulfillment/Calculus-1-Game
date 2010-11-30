@@ -130,15 +130,17 @@ class Graphics(object):
                "\\s(15%)\\h("+str(moveleft)+")\\v(40%)\\c(" + colorhighlight + ")speak through the streets"
     
     @staticmethod
-    @errorlog()
-    def convertFormulaToPNG(formula):
+    #@errorlog()
+    def convertFormulaToPNG(formula, fontsize):
         import sympy,tempfile
         from commands import getstatusoutput as runthis
         expr = sympy.sympify(formula)
+        print fontsize
         format = r"""\documentclass[12pt]{article}
                      \usepackage{amsmath}
                      \begin{document}
                      \pagestyle{empty}
+                     \fontsize{%d}{0}
                      %s
                      \vfill
                      \end{document}
@@ -146,7 +148,7 @@ class Graphics(object):
         tmp = tempfile.mktemp()
 
         tex = open(tmp + ".tex", "w")
-        tex.write(format % sympy.latex(expr, mode='inline'))
+        tex.write(format % (fontsize, sympy.latex(expr, mode='inline')))
         tex.close()
 
         cwd = os.getcwd()
@@ -329,7 +331,8 @@ class Graphics(object):
                                      int(param[2:4],16),
                                      int(param[4:6],16))
                     elif function == 'X':
-                        return Graphics.convertFormulaToPNG(param)
+                        #return Graphics.convertFormulaToPNG(param)
+                        glyphs += [(None, {'formula': param, 'size': cur_font_size})]
                     elif function == 'b':
                         cur_font.set_bold(str_to_num(param))
                     elif function == 'i':
@@ -403,7 +406,9 @@ class Graphics(object):
             # First, we need to find the bounding rectangle for this line
             bounding_rect = pygame.Rect(0,0,0,0)
             for c,glyph in line:
-                if c == None:
+                renderme = True
+                if c is None:
+                    renderme = False
                     if glyph.has_key('dx'):
                         x += glyph['dx']
                     if glyph.has_key('dy'):
@@ -412,7 +417,14 @@ class Graphics(object):
                         line_spacing = glyph['line_spacing']
                     if glyph.has_key('alignment'):
                         alignment = glyph['alignment']
-                else:
+                    if 'formula' in glyph:
+                        glyph_font_size = glyph['size']
+                        glyph = glyph['formula']
+                        if glyph not in glyph_dict:
+                            glyph_dict[glyph] = Graphics.convertFormulaToPNG(glyph, glyph_font_size)
+                        renderme = True
+                    
+                if renderme:
                     # Add in the current glyph's rectangle
                     glyph_rect = glyph_dict[glyph].get_rect()
                     bounding_rect.union_ip(glyph_rect.move(x,dy))
@@ -448,7 +460,9 @@ class Graphics(object):
             #x = 0
             dy = y
             for c,glyph in surface:
+                renderme = True
                 if c == None:
+                    renderme = False
                     if glyph.has_key('dx'):
                         x += glyph['dx']
                     if glyph.has_key('dy'):
@@ -457,7 +471,11 @@ class Graphics(object):
                         line_spacing = glyph['spacing']
                     if glyph.has_key('alignment'):
                         alignment = glyph['alignment']
-                else:
+                    if 'formula' in glyph:
+                        glyph = glyph['formula']
+                        renderme = True
+                        
+                if renderme:
                     # This is a glyph -- draw it
                     text_image.blit(glyph_dict[glyph], (x - bounding_rect.left, dy - bounding_rect.top))
                     x += getimgwidth(glyph_dict[glyph])
