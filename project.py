@@ -262,33 +262,33 @@ class formulac:
         self.opt_v = optimal_val
         self.c = [self.opt_v]
         self.c.extend([random.normalvariate(self.opt_v,difficulty) in range(3)])
-
+#   ^^^^^Move Below^^^^
 inequality = ' <= '
 constants = [1, 2, 3, 4]
+"""
+TODO: 
++Calculate constants based on optimal value & difficulty. 
+-- More difficult, lower std dev consts are from the optimal_val 
+-- #use random.normalvariate(mu, sigma)
+"""
+
+def create_OptionScreen(options,done):
+  global current_screen
+  current_screen = OptionScreen(options, 'submit')
+  current_screen.donehandler = done
+
 def claim_chooser():
     optimal_val = 1
     options = [formula+inequality+str(c) for c in constants]
-    create_optionscreen(options,action_screen)
+    create_OptionScreen(options,action_screen)
 
 def action_screen(i):
     global c 
     c = constants[i]
     print c
     options = ["Strengthen claim", "Refute claim", "Agree with claim"]
-    create_optionscreen(options,switch_to_game)
+    create_OptionScreen(options,switch_to_game)
 
-"""
-TODO: 
-+Create a formula object.
-+Calculate constants based on optimal value & difficulty. 
--- More difficult, lower std dev consts are from the optimal_val 
--- #use random.normalvariate(mu, sigma)
-"""
-
-def create_optionscreen(options,done):
-  global current_screen
-  current_screen = OptionScreen(options, 'submit')
-  current_screen.donehandler = done
 
 def get_key():
   while 1:
