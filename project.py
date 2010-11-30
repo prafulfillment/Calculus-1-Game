@@ -34,6 +34,8 @@ constants = [1, 2, 3, 4]
 formula = 'x + y'
 x,y,c=(0,0,0)
 
+player = 1
+
 ###-------------------------------------------------------------------------###
 
 # Classes
@@ -293,20 +295,23 @@ def display_box(message):
   pygame.draw.rect(screen, (0,0,0),
                    ((screen.get_width() / 2) - 100,
                     (screen.get_height() / 2) - 10,
-                    200,20), 0)
+                    400,40), 0)
   pygame.draw.rect(screen, (255,255,255),
                    ((screen.get_width() / 2) - 102,
                     (screen.get_height() / 2) - 12,
-                    204,24), 1)
+                    404,44), 1)
   if len(message) != 0:
     screen.blit(fontobject.render(message, 1, (255,255,255)),
                 ((screen.get_width() / 2) - 100, (screen.get_height() / 2) - 10))
   pygame.display.flip()
 
-def choose_val(val, f_range=(0,1)):
+def choose_val(val, player, f, f_range=(0,1)):
+  screen.fill((0,0,0))
   val_num = float('inf')
   while val_num < f_range[0] or val_num > f_range[1]:
-    val_num = create_AskScreen("Give us "+val+": ")
+    question = "Player %d give us %s for (%s) in range [%d,%d]: " \
+               %(player, val, f, f_range[0], f_range[1])
+    val_num = create_AskScreen(question)
     try:
         val_num = float(val_num)
     except ValueError: 
@@ -346,23 +351,40 @@ def claim_chooser():
 
 def action_screen(i):
     global c 
-    c = constants[i]
-    options = ["Strengthen claim", "Refute claim", "Agree with claim"]
+    c = constants[i] if( not i==-1) else c
+    claim = formula+inequality+str(c)
+    options = ["Strengthen", "Refute", "Agree with"]
+    options = ["%s (%s)" %(x,claim) for x in options]
     create_OptionScreen(options,switch_to_game)
 
 def switch_to_game(option):
-  global current_screen,house_skin, bg_skin, catapult_skin
-  global x,y,c
-  if option == 0:
-      c = choose_val('c')
-  elif option == 1:
-     x = choose_val('x')
-     y = choose_val('y')
-  else:
-    if (bool(eval(formula+inequality+str(c)))):
-        current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
-    else: claim_chooser()
-  #current_screen = GameOverScreen(create_optionscreen)
+    global current_screen,house_skin, bg_skin, catapult_skin
+    global x,y,c,player
+
+    f = formula+inequality+str(c)
+    player = (player % 2) + 1
+
+    if option == 0:
+        c = choose_val('c',player,f, f_range=(0,10))
+        action_screen(-1)
+    elif option == 1:
+        x = choose_val('x', player, f)
+
+        y = choose_val('y', player, f.replace("x",str(x)))
+        f.replace("y", str(y))
+        f = eval(f)
+
+        result = "successfully" if (bool(f)) else "unsuccessfully"
+        action = "Player %d has %s defended his claim with %d" %(player,result, x)
+        display_box(action)
+        pygame.time.wait(5000)
+    else:
+        if (bool(eval(f))):
+            current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
+        else:
+            display_box("Claim incorrect")
+            pygame.time.wait(1000)
+            claim_chooser()
 
 ###-------------------------------------------------------------------------###
 
@@ -374,29 +396,29 @@ clock = pygame.time.Clock()
 claim_chooser()
 
 while running :
-  for event in pygame.event.get():
-    if event.type == pygame.QUIT:
-      running = False
-      break
-    elif event.type == MOUSEMOTION:
-      current_screen.mousemotion(event)
-    elif event.type == MOUSEBUTTONDOWN:
-      current_screen.mousedown(event)
-    elif event.type == MOUSEBUTTONUP:
-      current_screen.mouseup(event)
-    #elif event.type == KEY_DOWN:
-    #  running = False
-    #  break
-  
-  #camera.move((1, 0))
-  
-  screen.fill((0,0,0))
-  #screen.blit(background, [-i for i in camera.getpos()])
-  
-  #allsprites.update(camera)
-  #allsprites.draw(screen)
-  
-  current_screen.update()
-  current_screen.draw(screen)
-  pygame.display.flip()
-  clock.tick(FPS)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+            break
+        elif event.type == MOUSEMOTION:
+            current_screen.mousemotion(event)
+        elif event.type == MOUSEBUTTONDOWN:
+            current_screen.mousedown(event)
+        elif event.type == MOUSEBUTTONUP:
+            current_screen.mouseup(event)
+        #elif event.type == KEY_DOWN:
+        #    running = False
+        #  break
+
+        #camera.move((1, 0))
+
+    screen.fill((0,0,0))
+    #screen.blit(background, [-i for i in camera.getpos()])
+
+    #allsprites.update(camera)
+    #allsprites.draw(screen)
+
+    current_screen.update()
+    current_screen.draw(screen)
+    pygame.display.flip()
+    clock.tick(FPS)
