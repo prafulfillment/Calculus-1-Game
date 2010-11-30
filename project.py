@@ -23,8 +23,8 @@ import graphics
 ###-------------------------------------------------------------------------###
 
 # Constants
-WIDTH = 800
-HEIGHT = 600
+WIDTH = 1024
+HEIGHT =  500
 AREA_SIZE = 1600, 600
 FPS = 60
 
@@ -360,7 +360,7 @@ def action_screen(i):
     c = constants[i] if( not i==-1) else c
     claim = formula+inequality+str(c)
     options = ["Strengthen", "Refute", "Agree with"]
-    options = ["P%d %s (\\X(%s))" %(player,x,claim) for x in options]
+    options = ["P%d %s \\X(%s)" %(player,x,claim) for x in options]
     create_OptionScreen(options,switch_to_game)
 
 def switch_to_game(option):
@@ -373,6 +373,7 @@ def switch_to_game(option):
         c = choose_val('c',player,f, f_range=(0,10))
         action_screen(-1)
     elif option == 1:
+        f = f.replace('\\(', '(').replace('\\)', ')')
         x = choose_val('x', player, f)
     
         change_player()
