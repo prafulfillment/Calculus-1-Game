@@ -1,14 +1,38 @@
-import os
+# Global imports
+import os, random 
+
+# Pygame imports
 import pygame
 from pygame.locals import *
-import graphics
 import pygame.font, pygame.event, pygame.draw, string
 
+# Local imports
+import graphics
 
-def load_image(*path):
-  image = pygame.image.load(os.path.join(os.getcwd(), 'data', *path)).convert()
-  return image
+# Constants
+WIDTH = 800
+HEIGHT = 600
+AREA_SIZE = 1600, 600
+FPS = 60
 
+# Globals
+current_screen = None
+running = True
+
+x,y,c=(0,0,0)
+height_offset = 400
+left_offset = 20
+
+house_skin = 'default'
+bg_skin = 'default'
+catapult_skin = 'default'
+
+#### TODO: MOVE INTO FORMULAC CLASS ####
+inequality = ' <= '
+constants = [1, 2, 3, 4]
+formula = 'x + y'
+
+# Classes
 class Camera(object):
   def __init__(self):
     self.pos = 0, 0
@@ -36,25 +60,6 @@ class House(pygame.sprite.Sprite):
     #self.move_to((self.rect.left, self.rect.top + 1))
     self.rect = self.rect.move((0, 1))
     self.rect = self.realrect.move((-camera.getpos()[0], -camera.getpos()[1]))
-
-WIDTH = 800
-HEIGHT = 600
-AREA_SIZE = 1600, 600
-FPS = 60
-
-
-x,y,c=(0,0,0)
-height_offset = 400
-left_offset = 20
-
-house_skin = 'default'
-bg_skin = 'default'
-catapult_skin = 'default'
-
-pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-
-clock = pygame.time.Clock()
 
 class Screen(object):
   def __init__(self):
@@ -249,11 +254,6 @@ class GameOverScreen(object):
     else:
       self.button.mousecancel()
 
-
-current_screen = None
-
-formula = 'x + y'
-import random 
 class formulac:
     """formula class"""
     def __init__(self, expression, inequality, optimal_val, difficulty=1):
@@ -262,15 +262,13 @@ class formulac:
         self.opt_v = optimal_val
         self.c = [self.opt_v]
         self.c.extend([random.normalvariate(self.opt_v,difficulty) in range(3)])
-#   ^^^^^Move Below^^^^
-inequality = ' <= '
-constants = [1, 2, 3, 4]
-"""
-TODO: 
-+Calculate constants based on optimal value & difficulty. 
--- More difficult, lower std dev consts are from the optimal_val 
--- #use random.normalvariate(mu, sigma)
-"""
+
+
+# Function Definitions 
+
+def load_image(*path):
+  image = pygame.image.load(os.path.join(os.getcwd(), 'data', *path)).convert()
+  return image
 
 def create_OptionScreen(options,done):
   global current_screen
@@ -342,7 +340,6 @@ def choose_val(val, f_range=(0,1)):
         pass
   return val_num
 
-claim_chooser()
 def switch_to_game(option):
   global current_screen,house_skin, bg_skin, catapult_skin
   global x,y,c
@@ -356,7 +353,12 @@ def switch_to_game(option):
     current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
   #current_screen = GameOverScreen(create_optionscreen)
 
-running = True
+# Run the program! 
+pygame.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+clock = pygame.time.Clock()
+
+claim_chooser()
 
 while running :
   for event in pygame.event.get():
