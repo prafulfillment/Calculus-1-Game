@@ -9,6 +9,8 @@ import pygame.font, pygame.event, pygame.draw, string
 # Local imports
 import graphics
 
+###-------------------------------------------------------------------------###
+
 # Constants
 WIDTH = 800
 HEIGHT = 600
@@ -19,7 +21,6 @@ FPS = 60
 current_screen = None
 running = True
 
-x,y,c=(0,0,0)
 height_offset = 400
 left_offset = 20
 
@@ -27,10 +28,13 @@ house_skin = 'default'
 bg_skin = 'default'
 catapult_skin = 'default'
 
-#### TODO: MOVE INTO FORMULAC CLASS ####
+## TODO: MOVE INTO FORMULAC CLASS ##
 inequality = ' <= '
 constants = [1, 2, 3, 4]
 formula = 'x + y'
+x,y,c=(0,0,0)
+
+###-------------------------------------------------------------------------###
 
 # Classes
 class Camera(object):
@@ -125,10 +129,9 @@ class Button(object):
     pygame.draw.rect(screen, color, self.rect)
     pygame.draw.rect(screen, (128, 128, 128), self.rect, 1)
     renderedText = graphics.Graphics.renderText(self.caption)
-    screen.blit(renderedText, (self.rect.left + self.rect.width / 2. - renderedText.get_rect().width / 2., self.rect.top + self.rect.height / 2. - renderedText.get_rect().height / 2.))
-  
-  def mousemotion(self, event):
-    pass
+    screen.blit(renderedText, 
+               (self.rect.left + self.rect.width / 2. - renderedText.get_rect().width / 2., 
+               self.rect.top + self.rect.height / 2. - renderedText.get_rect().height / 2.))
   
   def mousedown(self, event):
     self.mouseisdown = True
@@ -139,6 +142,10 @@ class Button(object):
   
   def mousecancel(self):
     self.mouseisdown = False
+
+  def mousemotion(self, event):
+    pass
+  
 
 class OptionScreen(object):
   def __init__(self, options, buttoncaption, donehandler=lambda x:None):
@@ -181,23 +188,10 @@ class OptionScreen(object):
         button.onclick = select_this_button
       self.buttons.append(button)
   
-  def update(self):
-    pass
-  
   def draw(self, screen):
     for button in self.buttons:
       button.draw(screen)
-      
-  
-  def reset(self):
-    pass
-  
-  def keydown(self, event):
-    pass
-  
-  def keyup(self, event):
-    pass
-  
+
   def mousemotion(self, event):
     for button in self.buttons:
       if button.rect.collidepoint(event.pos):
@@ -215,21 +209,9 @@ class OptionScreen(object):
       else:
         button.mousecancel()
 
-
-class GameOverScreen(object):
-  def __init__(self, retryclick):
-    global WIDTH, HEIGHT
-    self.button = Button(pygame.Rect(WIDTH / 2. - 100, HEIGHT - 200, 200, 100), 'Retry')
-    self.button.onclick = retryclick
-  
   def update(self):
     pass
-  
-  def draw(self, screen):
-    text = graphics.Graphics.renderText('\\s(26)Game Over')
-    screen.blit(text, (screen.get_rect().width / 2. - text.get_rect().width / 2,
-                       screen.get_rect().height / 2. - text.get_rect().height / 2))
-    self.button.draw(screen)
+      
   
   def reset(self):
     pass
@@ -239,6 +221,19 @@ class GameOverScreen(object):
   
   def keyup(self, event):
     pass
+
+
+class GameOverScreen(object):
+  def __init__(self, retryclick):
+    global WIDTH, HEIGHT
+    self.button = Button(pygame.Rect(WIDTH / 2. - 100, HEIGHT - 200, 200, 100), 'Retry')
+    self.button.onclick = retryclick
+  
+  def draw(self, screen):
+    text = graphics.Graphics.renderText('\\s(26)Game Over')
+    screen.blit(text, (screen.get_rect().width / 2. - text.get_rect().width / 2,
+                       screen.get_rect().height / 2. - text.get_rect().height / 2))
+    self.button.draw(screen)
   
   def mousemotion(self, event):
     if self.button.rect.collidepoint(event.pos):
@@ -254,6 +249,18 @@ class GameOverScreen(object):
     else:
       self.button.mousecancel()
 
+  def update(self):
+    pass
+  
+  def reset(self):
+    pass
+  
+  def keydown(self, event):
+    pass
+  
+  def keyup(self, event):
+    pass
+
 class formulac:
     """formula class"""
     def __init__(self, expression, inequality, optimal_val, difficulty=1):
@@ -263,30 +270,14 @@ class formulac:
         self.c = [self.opt_v]
         self.c.extend([random.normalvariate(self.opt_v,difficulty) in range(3)])
 
+###-------------------------------------------------------------------------###
 
 # Function Definitions 
 
+## Helper functions ## 
 def load_image(*path):
   image = pygame.image.load(os.path.join(os.getcwd(), 'data', *path)).convert()
   return image
-
-def create_OptionScreen(options,done):
-  global current_screen
-  current_screen = OptionScreen(options, 'submit')
-  current_screen.donehandler = done
-
-def claim_chooser():
-    optimal_val = 1
-    options = [formula+inequality+str(c) for c in constants]
-    create_OptionScreen(options,action_screen)
-
-def action_screen(i):
-    global c 
-    c = constants[i]
-    print c
-    options = ["Strengthen claim", "Refute claim", "Agree with claim"]
-    create_OptionScreen(options,switch_to_game)
-
 
 def get_key():
   while 1:
@@ -312,7 +303,24 @@ def display_box(message):
                 ((screen.get_width() / 2) - 100, (screen.get_height() / 2) - 10))
   pygame.display.flip()
 
-def AskScreen(question):
+def choose_val(val, f_range=(0,1)):
+  val_num = float('inf')
+  while val_num < f_range[0] or val_num > f_range[1]:
+    val_num = create_AskScreen("Give us "+val+": ")
+    try:
+        val_num = float(val_num)
+    except ValueError: 
+        pass
+  return val_num
+
+
+## Create_[X]Screen functions ##
+def create_OptionScreen(options,done):
+  global current_screen
+  current_screen = OptionScreen(options, 'submit')
+  current_screen.donehandler = done
+
+def create_AskScreen(question):
   "ask(question) -> answer"
   pygame.font.init()
   current_string = ""
@@ -330,15 +338,17 @@ def AskScreen(question):
     display_box(question + current_string)
   return current_string
 
-def choose_val(val, f_range=(0,1)):
-  val_num = float('inf')
-  while val_num < f_range[0] or val_num > f_range[1]:
-    val_num = AskScreen("Give us "+val+": ")
-    try:
-        val_num = float(val_num)
-    except ValueError: 
-        pass
-  return val_num
+## Main functions ## 
+def claim_chooser():
+    optimal_val = 1
+    options = [formula+inequality+str(c) for c in constants]
+    create_OptionScreen(options,action_screen)
+
+def action_screen(i):
+    global c 
+    c = constants[i]
+    options = ["Strengthen claim", "Refute claim", "Agree with claim"]
+    create_OptionScreen(options,switch_to_game)
 
 def switch_to_game(option):
   global current_screen,house_skin, bg_skin, catapult_skin
@@ -352,6 +362,8 @@ def switch_to_game(option):
     print eval(formula+inequality+str(c))
     current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
   #current_screen = GameOverScreen(create_optionscreen)
+
+###-------------------------------------------------------------------------###
 
 # Run the program! 
 pygame.init()
