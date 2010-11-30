@@ -1,5 +1,16 @@
+"""
+TODO: 
+    + Code is way hacked
+    + Integrate with server back-end
+    -- Pass server current state
+    -- Accept server messages to transition state
+"""
 # Global imports
-import os, random 
+import os, random,sys
+
+# Sympy imports
+import sympy
+from sympy.abc import x,y
 
 # Pygame imports
 import pygame
@@ -29,9 +40,10 @@ bg_skin = 'default'
 catapult_skin = 'default'
 
 ## TODO: MOVE INTO FORMULAC CLASS ##
-inequality = ' <= '
-constants = [1, 2, 3, 4]
-formula = 'x + y'
+inequality = ' >= '
+constants = [0.55, 0.60, 0.65]
+formula = '(x*y+(1-x)*(1-y**2))'
+formula_print = sympy.pretty(sympy.sympify(formula))
 x,y,c=(0,0,0)
 
 player = 1
@@ -39,6 +51,7 @@ player = 1
 ###-------------------------------------------------------------------------###
 
 # Classes
+
 class Camera(object):
   def __init__(self):
     self.pos = 0, 0
@@ -130,7 +143,7 @@ class Button(object):
     
     pygame.draw.rect(screen, color, self.rect)
     pygame.draw.rect(screen, (128, 128, 128), self.rect, 1)
-    renderedText = graphics.Graphics.renderText(self.caption)
+    renderedText = graphics.Graphics.renderText(self.caption, font_size=18)
     screen.blit(renderedText, 
                (self.rect.left + self.rect.width / 2. - renderedText.get_rect().width / 2., 
                self.rect.top + self.rect.height / 2. - renderedText.get_rect().height / 2.))
@@ -277,6 +290,10 @@ class formulac:
 # Function Definitions 
 
 ## Helper functions ## 
+def change_player():
+    global player
+    player = (player % 2) + 1
+
 def load_image(*path):
   image = pygame.image.load(os.path.join(os.getcwd(), 'data', *path)).convert()
   return image
@@ -346,7 +363,8 @@ def create_AskScreen(question):
 ## Main functions ## 
 def claim_chooser():
     optimal_val = 1
-    options = [formula+inequality+str(c) for c in constants]
+    options = [formula_print+inequality+str(c) for c in constants]
+    change_player()
     create_OptionScreen(options,action_screen)
 
 def action_screen(i):
@@ -354,7 +372,7 @@ def action_screen(i):
     c = constants[i] if( not i==-1) else c
     claim = formula+inequality+str(c)
     options = ["Strengthen", "Refute", "Agree with"]
-    options = ["%s (%s)" %(x,claim) for x in options]
+    options = ["P%d %s (%s)" %(player,x,claim) for x in options]
     create_OptionScreen(options,switch_to_game)
 
 def switch_to_game(option):
@@ -362,20 +380,20 @@ def switch_to_game(option):
     global x,y,c,player
 
     f = formula+inequality+str(c)
-    player = (player % 2) + 1
 
     if option == 0:
         c = choose_val('c',player,f, f_range=(0,10))
         action_screen(-1)
     elif option == 1:
         x = choose_val('x', player, f)
+    
+        change_player()
 
         y = choose_val('y', player, f.replace("x",str(x)))
         f.replace("y", str(y))
-        f = eval(f)
 
-        result = "successfully" if (bool(f)) else "unsuccessfully"
-        action = "Player %d has %s defended his claim with %d" %(player,result, x)
+        result = "successfully" if (bool(eval(f))) else "unsuccessfully"
+        action = "Player %d has %s defended (%s) with y=%d" %(player,result,f, y)
         display_box(action)
         pygame.time.wait(5000)
     else:
@@ -393,6 +411,8 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
+display_box(formula_print)
+pygame.time.wait(10000)
 claim_chooser()
 
 while running :

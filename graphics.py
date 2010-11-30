@@ -208,7 +208,7 @@ class Graphics(object):
     #\v(number)      Changes the vertical offset to number (lasts the rest of the text)
     #\l(number)      Changes line spacing
     #\a(r|c|l)       Changes the alignment of text to (l)eft, (c)enter, or (r)ight
-    def renderText(text, antialias=1, backgroundcolor=(0,0,0,0), wordwrap=False, wrapwidth=600, getsize=False, glyph_dict=None):
+    def renderText(text, antialias=1, backgroundcolor=(0,0,0,0), wordwrap=False, wrapwidth=600, getsize=False, glyph_dict=None, font_size=36):
         """
         Renders the given text on a surface with the given backgroundcolor.
         Antialiases is antialias is True
@@ -217,7 +217,7 @@ class Graphics(object):
         """
         t1 = time.time()
         cur_font_name = os.path.join('data', 'fonts', 'freesansbold.ttf')
-        cur_font_size = 36
+        cur_font_size = font_size
         cur_font = pygame.font.Font(cur_font_name, cur_font_size)
         cur_color = (0,0,0)
         last_glyph_height = cur_font.get_linesize()
