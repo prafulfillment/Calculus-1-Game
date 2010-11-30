@@ -359,8 +359,9 @@ def switch_to_game(option):
      x = choose_val('x')
      y = choose_val('y')
   else:
-    print eval(formula+inequality+str(c))
-    current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
+    if (bool(eval(formula+inequality+str(c)))):
+        current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
+    else: claim_chooser()
   #current_screen = GameOverScreen(create_optionscreen)
 
 ###-------------------------------------------------------------------------###
