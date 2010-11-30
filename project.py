@@ -6,7 +6,7 @@ TODO:
     -- Accept server messages to transition state
 """
 # Global imports
-import os, random,sys
+import os, random,sys, tempfile
 
 # Sympy imports
 import sympy
@@ -42,8 +42,9 @@ catapult_skin = 'default'
 ## TODO: MOVE INTO FORMULAC CLASS ##
 inequality = ' >= '
 constants = [0.55, 0.60, 0.65]
-formula = '(x*y+(1-x)*(1-y**2))'
-formula_print = sympy.pretty(sympy.sympify(formula))
+formula = 'x**2'
+#formula = 'x*y+(1-x)*(1-y**2)'
+#formula_print = sympy.pretty(sympy.sympify(formula))
 x,y,c=(0,0,0)
 
 player = 1
@@ -363,7 +364,7 @@ def create_AskScreen(question):
 ## Main functions ## 
 def claim_chooser():
     optimal_val = 1
-    options = ['\s(18)'+formula_print+inequality+str(c) for c in constants]
+    options = ['P1 choose ('+formula+inequality+str(c)+')' for c in constants]
     change_player()
     create_OptionScreen(options,action_screen)
 

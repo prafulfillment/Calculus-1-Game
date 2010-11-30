@@ -131,6 +131,48 @@ class Graphics(object):
     
     @staticmethod
     @errorlog()
+    def convertFormulaToPNG(formula):
+        import sympy,tempfile
+        from commands import getstatusoutput as runthis
+        expr = sympy.sympify(formula)
+        format = r"""\documentclass[12pt]{article}
+                     \usepackage{amsmath}
+                     \begin{document}
+                     \pagestyle{empty}
+                     %s
+                     \vfill
+                     \end{document}
+                 """
+        tmp = tempfile.mktemp()
+
+        tex = open(tmp + ".tex", "w")
+        tex.write(format % sympy.latex(expr, mode='inline'))
+        tex.close()
+
+        cwd = os.getcwd()
+        os.chdir(tempfile.gettempdir())
+        latex_cmd = runthis("latex -halt-on-error %s.tex" % tmp) 
+        if latex_cmd[0] != 0:
+            raise SystemError("Failed to generate DVI output.")
+
+        os.remove(tmp + ".tex")
+        os.remove(tmp + ".aux")
+        os.remove(tmp + ".log")
+
+        png_cmd = "dvipng -bg Transparent -T tight -z 9" + \
+                  "--truecolor -o %s.png %s.dvi" % (tmp, tmp)
+
+        if runthis(png_cmd)[0] != 0:
+            raise SystemError("Failed to generate '%s' png.")
+        else:
+            os.remove(tmp + ".dvi")
+
+        src = "%s.png" % (tmp)
+        os.chdir(cwd)
+        return pygame.image.load(src)
+    
+    @staticmethod
+    @errorlog()
     def renderLogo(size, moveleft=-127, colormain='FFFFFF', colorhighlight='FF0000'):
         """ Returns a surface with the ampidea logo rendered """
         return Graphics.renderText(Graphics.getLogoText(size, moveleft, colormain, colorhighlight), 1)
@@ -197,6 +239,25 @@ class Graphics(object):
     # then zero or more alphanumeric or whitespace characters in parentheses.
     command_regex = r'\\\w\(.*?\)'
     command_pattern = re.compile(command_regex)
+   
+    @staticmethod
+    def match_paren(str):
+        """Regex is poor to match nested parens"""
+        start = -1
+        paren = 0
+        end = 0
+
+        for x in range(len(str)):
+            if str[x] == "(":
+                if start == -1:
+                    start = x + 1
+                paren = paren + 1
+            elif str[x] == ")":
+                paren = paren - 1
+                if paren == 0:
+                    end = x
+                    break
+        return str[start:end]    
     
     @staticmethod
     #@errorlog()
