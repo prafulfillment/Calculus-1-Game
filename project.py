@@ -1,9 +1,15 @@
 """
 TODO: 
-    + Code is way hacked
+    +/ Integrate attack sequence (trajectory.py)
+    +/ House build (pymunk)
+    +/ Hints (Wolfram Alpha) 
+    +/ Optimal value check (manual) 
+    + Calculate optimal value
     + Integrate with server back-end
     -- Pass server current state
     -- Accept server messages to transition state
+    + Convert formula to tuple
+    + Py2exe 
 """
 # Global imports
 import os, random,sys, tempfile
@@ -264,14 +270,6 @@ class GameOverScreen(object):
   def keyup(self, event):
     pass
 
-class formulac:
-    """formula class"""
-    def __init__(self, expression, inequality, optimal_val, difficulty=1):
-        self.exp = expression
-        self.ineq = inequality
-        self.opt_v = optimal_val
-        self.c = [self.opt_v]
-        self.c.extend([random.normalvariate(self.opt_v,difficulty) in range(3)])
 
 ###-------------------------------------------------------------------------###
 
