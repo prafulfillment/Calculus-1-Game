@@ -161,7 +161,8 @@ class Graphics(object):
         os.remove(tmp + ".aux")
         os.remove(tmp + ".log")
 
-        png_cmd = "dvipng -bg Transparent -T tight -z 9" + \
+        # -bg Transparent
+        png_cmd = "dvipng -T tight -z 9" + \
                   "--truecolor -o %s.png %s.dvi" % (tmp, tmp)
 
         if runthis(png_cmd)[0] != 0:

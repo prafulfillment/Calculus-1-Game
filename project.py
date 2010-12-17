@@ -1,15 +1,15 @@
 """
 TODO: 
-    +/ Integrate attack sequence (trajectory.py)
-    +/ House build (pymunk)
-    +/ Hints (Wolfram Alpha) 
-    +/ Optimal value check (manual) 
-    + Calculate optimal value
+    + Integrate attack sequence (trajectory.py)
     + Integrate with server back-end
     -- Pass server current state
     -- Accept server messages to transition state
+    + Add sounds
+BACK_BURNER:
     + Convert formula to tuple
     + Py2exe 
+    + House build (pymunk)
+    + Calculate optimal value
 """
 # Global imports
 import os, random,sys, tempfile
@@ -48,10 +48,12 @@ catapult_skin = 'default'
 ## TODO: MOVE INTO FORMULAC CLASS ##
 inequality = ' >= '
 constants = [0.55, 0.60, 0.65]
+optimal_value = 0.625
 #formula = 'x**2'
 formula = 'x*y+\\(1-x\\)*\\(1-y**2\\)'
 #formula_print = sympy.pretty(sympy.sympify(formula))
-x,y,c=(0,0,0)
+x,y,c=(0,0,-1)
+hint = -1
 
 player = 1
 
@@ -183,7 +185,7 @@ class OptionScreen(object):
     
     real_button_height = HEIGHT/ (len(self.options) + 1)
     def getbuttonmetrics(real_button_height, buttonhperc, idx):
-      button_voffset = real_button_height * idx + real_button_height * .25 * .5
+      button_voffset = real_button_height * idx + real_button_height * .25 * .5 + 50
       button_height = real_button_height * 0.75
       button_hoffset = WIDTH * (1 - buttonhperc) * 0.5
       button_width = WIDTH * buttonhperc
@@ -198,6 +200,11 @@ class OptionScreen(object):
       self.buttons.append(button)
   
   def draw(self, screen):
+    global c
+    c_txt = "c" if(c==-1) else str(c)
+    text = graphics.Graphics.renderText('\\c(FFFFFF)\\s(26)\\X(%s %s %s)' %(formula,inequality,c_txt))
+    screen.blit(text, (screen.get_rect().width / 2. - text.get_rect().width / 2,
+                       text.get_rect().height / 2))
     for button in self.buttons:
       button.draw(screen)
 
@@ -231,7 +238,51 @@ class OptionScreen(object):
   def keyup(self, event):
     pass
 
+class HelpScreen(object):
+  def __init__(self, which_hint):
+    global WIDTH, HEIGHT
+    self.button = Button(pygame.Rect(WIDTH / 2. - 100, HEIGHT - 120, 200, 100), 'Retry')
+    def select_this_button(self=self):
+        self.donehandler = action_screen(-1)
+    self.button.onclick = select_this_button
+    self.donehandler = action_screen(-1)
 
+    self.houses = House(house_skin), House(house_skin)
+    bg = ['3dplot.gif','contour.gif', 'region-55.png', 'region-60.png', 'region-65.png']
+    self.background = load_image('help',bg[which_hint])
+
+    
+  def update(self):
+    pass
+  
+  def draw(self, screen):
+    screen.blit(self.background, (screen.get_rect().width / 2. - self.background.get_rect().width / 2,
+                       screen.get_rect().height / 2. - self.background.get_rect().height/1.5))
+    self.button.draw(screen)
+
+  def mousemotion(self, event):
+    if self.button.rect.collidepoint(event.pos):
+      self.button.mousemotion(event)
+  
+  def mousedown(self, event):
+    if self.button.rect.collidepoint(event.pos):
+      self.button.mousedown(event)
+  
+  def mouseup(self, event):
+    if self.button.rect.collidepoint(event.pos):
+      self.button.mouseup(event)
+    else:
+      self.button.mousecancel()
+  
+  def reset(self):
+    pass
+  
+  def keydown(self, event):
+    pass
+  
+  def keyup(self, event):
+    pass
+  
 class GameOverScreen(object):
   def __init__(self, retryclick):
     global WIDTH, HEIGHT
@@ -322,7 +373,7 @@ def choose_val(val, player, f, f_range=(0,1)):
   return val_num
 
 
-## Create_[X]Screen functions ##
+## create_[X]Screen functions ##
 def create_OptionScreen(options,done):
   global current_screen
   current_screen = OptionScreen(options, 'submit')
@@ -348,27 +399,29 @@ def create_AskScreen(question):
 
 ## Main functions ## 
 def claim_chooser():
-    optimal_val = 1
-    options = ['P1 choose \X('+formula+inequality+str(c)+')' for c in constants]
+    options = ["P1 choose c=%0.2f" %(c) for c in constants]
     change_player()
     create_OptionScreen(options,action_screen)
 
 def action_screen(i):
-    global c 
+    global c
     c = constants[i] if( not i==-1) else c
     claim = formula+inequality+str(c)
-    options = ["Strengthen", "Refute", "Agree with"]
-    options = ["P%d %s \\X(%s)" %(player,x,claim) for x in options]
+    options = ["Strengthen", "Refute", "Agree", "Help"]
+    options = ["P%d %s" %(player,x) for x in options]
     create_OptionScreen(options,switch_to_game)
 
 def switch_to_game(option):
     global current_screen,house_skin, bg_skin, catapult_skin
-    global x,y,c,player
+    global x,y,c,player, optimal_value
+    global hint
 
     f = formula+inequality+str(c)
 
     if option == 0:
-        c = choose_val('c',player,f, f_range=(0,10))
+        f = f.replace('\\(', '(').replace('\\)', ')')
+        c = choose_val('c',player,f, f_range=(0,1))
+        change_player()
         action_screen(-1)
     elif option == 1:
         f = f.replace('\\(', '(').replace('\\)', ')')
@@ -383,10 +436,32 @@ def switch_to_game(option):
         action = "Player %d has %s defended (%s) with y=%d" %(player,result,f, y)
         display_box(action)
         pygame.time.wait(5000)
+    elif option == 3:
+        # ['3dplot.gif','contour.gif', 'region-55.png', 'region-60.png', 'region-65.png']
+        # Change the hint values to something easier to read
+        hint += 1
+        if hint > 4:
+            hint = 0
+        if hint == 2:
+            if c == 0.55:
+                hint = 2 
+            elif c == 0.6:
+                hint = 3
+            elif c == 0.65:
+                hint = 4
+            else: hint = 0
+        current_screen = HelpScreen(hint)
     else:
         if (bool(eval(f.replace('\\(', '(').replace('\\)', ')')))):
-            current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
+            if c == optimal_value:
+                current_screen = GameScreen(house_skin, bg_skin, catapult_skin)
+            else:
+                hint = -1
+                display_box("Optimal Value not found")
+                pygame.time.wait(1000)
+                claim_chooser()
         else:
+            hint = -1
             display_box("Claim incorrect")
             pygame.time.wait(1000)
             claim_chooser()
